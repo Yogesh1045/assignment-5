@@ -1,0 +1,43 @@
+== B3.1 10 rows with each approach, verified with SELECT + ResultSetMetaData ==
+   Statement          rows=10  every value equal to the input: true
+   PreparedStatement  rows=10  every value equal to the input: true
+   Batch              rows=10  every value equal to the input: true
+   ResultSetMetaData of bus_pass:
+     pass_id   VARCHAR  size=12  scale=0 nullable=NO
+     reg_no    CHAR     size=9   scale=0 nullable=NO
+     name      VARCHAR  size=60  scale=0 nullable=NO
+     route_no  INTEGER  size=11  scale=0 nullable=NO
+     amount    DECIMAL  size=8   scale=2 nullable=NO
+     campus    VARCHAR  size=20  scale=0 nullable=NO
+   first rows:
+     P0000000 192300000 Student 0    1  3000.00 MAIN
+     P0000001 192300001 Student 1    2  3100.00 MAIN
+     P0000002 192300002 Student 2    3  3200.00 MAIN
+
+== B3.2 insert time (ms), auto-commit ON (the JDBC default) ==
+        rows    Statement  PreparedStatement  Batch(1000)
+       1,000          217                217          244
+      10,000         2069               2050         1828
+     100,000        20049              17594        14834
+
+== B3.3 batch insert: auto-commit ON vs one transaction (ms) ==
+        rows Stmt autocommit       Stmt 1 txn Batch autocommit      Batch 1 txn
+       1,000            178               65            160               29
+      10,000           1821              577           1496              284
+     100,000          17481             5950          14732             2978
+
+   Failure half-way: 10,000 rows, row 5,001 has amount 'abc'
+   auto-commit ON : failed with NumberFormatException -> rows left in table = 5000
+   PassLoader (1 txn): failed with NumberFormatException -> rows left in table = 0
+
+== PassLoader.loadAll (Complete the Code) ==
+   loadAll(  1,000 passes) returned   1,000 in     33 ms; rows in table = 1,000
+   loadAll( 10,000 passes) returned  10,000 in    417 ms; rows in table = 10,000
+   loadAll(100,000 passes) returned 100,000 in   3213 ms; rows in table = 100,000
+
+== Alternatives for 100,000 rows (ms) ==
+   PreparedStatement batch, 1 txn     :   3103
+   multi-row INSERT, 1,000 rows each  :    551
+   LOAD DATA LOCAL INFILE (CSV)       :    495   (includes writing the CSV)
+   batch, 1 txn, rewriteBatchedStatements=true:    597   (driver rewrites each batch into multi-row INSERTs)
+   one 1,000-row multi-row INSERT string = 46,665 chars (~91 KB as UTF-16 in the JVM)
