@@ -1,0 +1,10 @@
+findAll           -> [Student[regNo=192311001, name=Arun Kumar, department=CSE, year=4, email=arun@simats.edu], Student[regNo=192311002, name=Divya R, department=IT, year=4, email=divya@simats.edu]]
+findById(...002)  -> Student[regNo=192311002, name=Divya R, department=IT, year=4, email=divya@simats.edu]
+update year to 3  -> true : Student[regNo=192311002, name=Divya R, department=IT, year=3, email=divya@simats.edu]
+delete(...001)    -> true, remaining 1
+findById(missing) -> Optional.empty
+duplicate insert  -> DataAccessException: INSERT failed: (conn=12155) Duplicate entry '192311002' for key 'PRIMARY'
+
+Cost per findById: DAO vs the same SQL written inline (median of 5 x 1,000):
+   DAO       : 502 us
+   inline SQL: 427 us   (both dominated by opening a connection + the round trip)
