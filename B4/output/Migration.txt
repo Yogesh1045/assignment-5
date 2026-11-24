@@ -1,0 +1,32 @@
+== B4.1 migration of the legacy pass file ==
+Lines read 100,001 | loaded 99,023 | rejected 978 | loaded+rejected = 100,001 | 1.1 s
+Failure report by reason: {bad register number=260, empty line=247, duplicate pass ID=1, non-numeric route/amount=237, expected 7 fields, found 6=233}
+First 5 rejected lines (full list in work/migration_failures.csv):
+   line     60  bad register number '12345'              P0000059|12345|Student 59|20|Stop5|2027-05-31|4900.00
+   line    146  bad register number '12345'              P0000145|12345|Student 145|26|Stop1|2027-05-31|3500.00
+   line    320  expected 7 fields, found 6               P0000319|192300319|Student 319|40|Stop4|2027-05-31
+   line    385  empty line                               
+   line    450  empty line                               
+Database now holds 99,023 passes, total amount Rs 391,153,200.00
+
+== B4.2 DatabaseMetaData ==
+Database product : MariaDB 10.11.14-MariaDB-0ubuntu0.24.04.1
+JDBC driver      : MariaDB Connector/J 2.7.6 (JDBC 4.2)
+URL / user       : jdbc:mariadb://localhost:3306/campus?allowLocalInfile=true&rewriteBatchedStatements=true / student
+Transactions     : supported=true, default isolation=4, batch updates=true
+Tables in catalog 'campus':
+   bus_pass       PK=[pass_id] pass_id:VARCHAR reg_no:CHAR name:VARCHAR route_no:INT amount:DECIMAL campus:VARCHAR 
+   doctors        PK=[id] id:VARCHAR name:VARCHAR department:VARCHAR 
+   events         PK=[id] id:INT name:VARCHAR venue:VARCHAR event_date:DATE capacity:INT 
+   registrations  PK=[id] id:BIGINT reg_no:CHAR student_name:VARCHAR email:VARCHAR department:VARCHAR event_id:INT registered_at:TIMESTAMP 
+   student        PK=[reg_no] reg_no:CHAR full_name:VARCHAR dept_code:VARCHAR study_year:INT email:VARCHAR 
+   users          PK=[id] id:VARCHAR pwd:VARCHAR role:VARCHAR 
+   wallet         PK=[owner] owner:VARCHAR kind:VARCHAR balance:DECIMAL 
+
+== Concurrent counters on the shared database: 12 counters x 200 new passes, plus 12 attempts at the SAME pass ID ==
+   inserted 2,401, rejected as duplicates 11 (expected 2,401 and 11) in 280 ms
+
+== Alternative: 12 campuses, each with its own serialized file (100x scale ~ 800,000 passes in total) ==
+   write 12 files: 1.5 s, total size 37 MB
+   find one pass across all campuses = deserialize all 12 files: 0.7 s (found 1)
+   same lookup in the shared database (primary key): 0.25 ms
