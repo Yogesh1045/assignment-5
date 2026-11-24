@@ -1,0 +1,17 @@
+Serialized Hostel graph: 600 bytes
+After reading back: name=Resident 11, regNo=1923110011, password=null, db=null
+Back-references preserved (same object, not a copy): true, true
+Password text present in the file bytes? false
+Without transient on the connection: java.io.NotSerializableException: java.lang.Object
+
+n residents: size and save+load time (median of 5)
+        n    serial KB     CSV KB    JSON KB      serial ms       CSV ms      JSON ms
+     1000           39         28         57            6.4          1.7          3.7
+    10000          407        289        582           22.5          2.7         25.5
+   100000         4167       2995       5924          158.8         35.6        225.1
+
+Versioning: file written by Resident v1, read by Resident v2 (new field 'phone')
+ (a) no serialVersionUID declared (computed from the class shape):
+   FAILED: Resident; local class incompatible: stream classdesc serialVersionUID = -1485896733400315031, local class serialVersionUID = -4704594282173425439
+ (b) serialVersionUID = 1L declared in both versions:
+   read OK: name=Arun, regNo=192311001, phone=null
