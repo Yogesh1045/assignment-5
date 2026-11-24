@@ -1,0 +1,8 @@
+Fixed record size = 84 bytes
+   passes      text KB       fixed KB   padding wasted  text scan find ms RAF seek find us
+     1000           57             82              51%               1.67           20.0
+    10000          582            820              50%              10.13           48.6
+   100000         5924           8203              49%              18.02           63.1
+
+DataOutputStream record (58 bytes): 00 05 50 31 30 30 31 00 09 31 39 32 33 31 31 30 30 31 00 0a 4d 61 72 79 20 7c 20 41 6e 6e 00 0c 00 08 54 61 6d 62 61 72 61 6d 00 00 00 00 00 00 51 e9 00 00 00 00 00 06 dd d0
+writeUTF = 2-byte length + UTF-8 bytes, so '|' inside a name needs no escaping.
